@@ -9,5 +9,7 @@ namespace ECommerceShopApi.Models {
             : base(options) {
                 
             }
+
+        public DbSet<Product> Products {get; set;}
     }
 }

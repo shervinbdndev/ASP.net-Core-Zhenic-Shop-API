@@ -1,10 +1,10 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Identity;
-using ECommerceShopApi.Models;
-using System.IdentityModel.Tokens.Jwt;
-using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Security.Claims;
+using ECommerceShopApi.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace ECommerceShopApi.Controllers {
     
@@ -13,10 +13,10 @@ namespace ECommerceShopApi.Controllers {
     [ApiController]
     public class AccountController : ControllerBase {
 
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
 
-        public AccountController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager) {
+        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager) {
 
             _userManager = userManager;
             _signInManager = signInManager;
@@ -122,6 +122,20 @@ namespace ECommerceShopApi.Controllers {
                     Message = "خروج از حساب کاربری با موفقیت انجام شد"
                 }
             );
+        }
+
+        
+        [HttpGet("users")]
+        public IActionResult FetchAllUsers() {
+
+            var users = _userManager.Users.Select(user => new {
+                UserName = user.UserName,
+                FirstName = (user as ApplicationUser).FirstName,
+                LastName = (user as ApplicationUser).LastName,
+                Email = user.Email,
+            }).ToList();
+
+            return Ok(users);
         }
     }
 }

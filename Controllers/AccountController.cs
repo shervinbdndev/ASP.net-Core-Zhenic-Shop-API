@@ -123,43 +123,5 @@ namespace ECommerceShopApi.Controllers {
                 }
             );
         }
-
-        
-        [HttpGet("user/{username}")]
-        public async Task<IActionResult> FetchUserByUsername(string username) {
-
-            var user = await _userManager.FindByNameAsync(username);
-
-            if (user == null) {
-
-                return NotFound(
-                    new {
-                        Message = "کاربر موردنظر یافت نشد"
-                    }
-                );
-            }
-
-            return Ok(new {
-                UserName = user.UserName,
-                FirstName = (user as ApplicationUser).FirstName,
-                LastName = (user as ApplicationUser).LastName,
-                Email = user.Email,
-                PasswordHash = user.PasswordHash,
-            });
-        }
-
-        
-        [HttpGet("users")]
-        public IActionResult FetchAllUsers() {
-
-            var users = _userManager.Users.Select(user => new {
-                UserName = user.UserName,
-                FirstName = (user as ApplicationUser).FirstName,
-                LastName = (user as ApplicationUser).LastName,
-                Email = user.Email,
-            }).ToList();
-
-            return Ok(users);
-        }
     }
 }

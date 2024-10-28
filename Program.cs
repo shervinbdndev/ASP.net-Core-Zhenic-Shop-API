@@ -3,9 +3,9 @@ using ECommerceShopApi.Models;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using ECommerceShopApi.Repositories;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using ECommerceShopApi.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 

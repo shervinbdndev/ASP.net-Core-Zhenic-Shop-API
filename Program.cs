@@ -1,4 +1,5 @@
 using System.Text;
+using ECommerceShopApi.Utils;
 using ECommerceShopApi.Models;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Identity;
@@ -11,10 +12,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
+
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IAccountRepository, AccountRepository>();
+builder.Services.AddScoped<JwtTokenGenerator>();
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
-var key = jwtSettings["Key"];
+var key = jwtSettings["Key"] ?? throw new ArgumentException("key");
 var issuer = jwtSettings["Issuer"];
 var audience = jwtSettings["Audience"];
 

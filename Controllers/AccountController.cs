@@ -1,10 +1,8 @@
-using System.Text;
-using System.Security.Claims;
+using ECommerceShopApi.Utils;
 using ECommerceShopApi.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
+using ECommerceShopApi.Repositories;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ECommerceShopApi.Controllers {
     
@@ -13,16 +11,19 @@ namespace ECommerceShopApi.Controllers {
     [ApiController]
     public class AccountController : ControllerBase {
 
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly IAccountRepository _accountRepository;
+        private readonly JwtTokenGenerator _jwtTokenGenerator;
 
-        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager) {
+        public AccountController(IAccountRepository accountRepository, JwtTokenGenerator jwtTokenGenerator) {
 
-            _userManager = userManager;
-            _signInManager = signInManager;
+            _accountRepository = accountRepository;
+            _jwtTokenGenerator = jwtTokenGenerator;
         }
 
 
+
+
+        [AllowAnonymous]
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterModel model) {
 
@@ -31,28 +32,22 @@ namespace ECommerceShopApi.Controllers {
                 return BadRequest(ModelState);
             }
 
-            var user = new ApplicationUser {
-                UserName = model.UserName,
-                FirstName = model.FirstName,
-                LastName = model.LastName,
-                Email = model.Email,
-            };
-
-            var result = await _userManager.CreateAsync(user, model.Password);
+            var result = await _accountRepository.RegisterUserAsync(model);
 
             if (!result.Succeeded) {
 
                 return BadRequest(result.Errors);
             }
 
-            return Ok(
-                new {
+            return Ok( new {
                     Message = "عملیات ثبت نام موفقیت آمیز بود"
                 }
             );
         }
 
         
+
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model) {
 
@@ -61,64 +56,28 @@ namespace ECommerceShopApi.Controllers {
                 return BadRequest(ModelState);
             }
 
-            var result = await _signInManager.PasswordSignInAsync(model.UserName, model.Password, isPersistent: false, lockoutOnFailure: false);
+            var loginResponse = await _accountRepository.LoginUserAsync(model);
 
-            if (!result.Succeeded) {
+            if (loginResponse == null) {
 
-                return Unauthorized(
-                    new {
+                return Unauthorized(new {
                         Message = "فرایند ورود به حساب کاربری با مشکل مواجه شد"
                     }
                 );
             }
 
-            var user = await _userManager.FindByNameAsync(model.UserName) as ApplicationUser;
-
-            if (user == null) {
-
-                return Unauthorized(
-                    new {
-                        Message = "کاربری پیدا نشد"
-                    }
-                );
-            }
-
-            var token = new JwtSecurityTokenHandler().WriteToken(
-                new JwtSecurityToken(
-                    issuer: "https://Zhenicshop.com",
-                    audience: "https://Zhenicshop.com/api",
-                    expires: DateTime.Now.AddDays(1),
-                    claims: new[] {
-                        new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
-                        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                        new Claim("FirstName", user.FirstName),
-                        new Claim("LastName", user.LastName)
-                    },
-                    signingCredentials: new SigningCredentials(
-                        key: new SymmetricSecurityKey(Encoding.UTF8.GetBytes("in-kelide-man-ast-1321464-be-in-adad-tavajoh-nakonid")),
-                        algorithm: SecurityAlgorithms.HmacSha256Signature
-                    )
-                )
-            );
-
-            return Ok(
-                new {
-                    Token = token,
-                    UserName = user.UserName,
-                    FirstName = user.FirstName,
-                    LastName = user.LastName,
-                }
-            );
+            return Ok(loginResponse);
         }
 
         
+
+        [Authorize]
         [HttpPost("logout")]
         public async Task<IActionResult> LogOut() {
 
-            await _signInManager.SignOutAsync();
+            await _accountRepository.SignOutUserAsync();
 
-            return Ok(
-                new {
+            return Ok(new {
                     Message = "خروج از حساب کاربری با موفقیت انجام شد"
                 }
             );

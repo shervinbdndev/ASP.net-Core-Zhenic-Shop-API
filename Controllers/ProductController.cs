@@ -1,21 +1,28 @@
 using ECommerceShopApi.Models;
 using Microsoft.AspNetCore.Mvc;
 using ECommerceShopApi.Repositories;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace ECommerceShopApi.Controllers {
 
     [Route("api/v1/[controller]")]
-    [ApiController]    
+    [ApiController]  
+    [Authorize]  
     public class ProductController : ControllerBase {
 
         private readonly IProductRepository _productRepository;
+        private readonly ILogger<ProductController> _logger;
 
-        public ProductController(IProductRepository productRepository) {
+        public ProductController(IProductRepository productRepository, ILogger<ProductController> logger) {
 
             _productRepository = productRepository;
+            _logger = logger;
         }
 
+
+
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetAllProducts() {
 
@@ -25,6 +32,8 @@ namespace ECommerceShopApi.Controllers {
         }
 
 
+
+        [AllowAnonymous]
         [HttpGet("{id}", Name = "GetProductById")]
         public async Task<IActionResult> GetProductById(int id) {
 
@@ -32,11 +41,14 @@ namespace ECommerceShopApi.Controllers {
 
             if (product == null) {
 
-                return NotFound();
+                return NotFound( new {
+                    Message = "محصول یافت نشد"
+                });
             }
 
             return Ok(product);
         }
+
 
         
         [HttpPost("add")]
@@ -44,13 +56,22 @@ namespace ECommerceShopApi.Controllers {
 
             if (!ModelState.IsValid) {
 
-                return BadRequest(ModelState);
+                return BadRequest(new {
+                    Message = "اطلاعات ورودی نامعتبر است"
+                });
+            }
+
+            if (product.Id != 0) {
+
+                return BadRequest("فیلد کلیدی درحین ساخت، تنظیم نمیشود");
             }
 
             await _productRepository.AddProductAsync(product);
+            _logger.LogInformation($"Product Created: {product.Name}");
 
             return CreatedAtAction(nameof(GetProductById), new { id = product.Id }, product);
         }
+
 
 
         [HttpPut("edit/{id}")]
@@ -58,19 +79,35 @@ namespace ECommerceShopApi.Controllers {
 
             if (id != product.Id || !ModelState.IsValid) {
 
-                return BadRequest();
+                return BadRequest("دیتای ورودی نامعتبر است");
+            }
+
+            var productExists = await _productRepository.GetProductByIdAsync(id);
+
+            if (productExists == null) {
+
+                return NotFound("محصول موردنظر یافت نشد");
             }
 
             await _productRepository.UpdateProductAsync(product);
+            _logger.LogInformation($"Product Updated: {product.Name}");
 
             return NoContent();
         }
 
 
+
         [HttpDelete("delete/{id}")]
         public async Task<IActionResult> Delete(int id) {
+            var product = await _productRepository.GetProductByIdAsync(id);
+
+            if (product == null) {
+
+                return NotFound("محصول مورد نظر یافت نشد");
+            }
 
             await _productRepository.DeleteProductAsync(id);
+            _logger.LogInformation($"Product Deleted: {id}");
 
             return NoContent();
         }

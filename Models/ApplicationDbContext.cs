@@ -19,15 +19,15 @@ namespace ECommerceShopApi.Models {
         {
             base.OnModelCreating(builder);
 
-            builder.Entity<Cart>()
-            .HasMany(c => c.Items)
-            .WithOne(cI => cI.Cart)
-            .HasForeignKey(cI => cI.CartId);
 
-            builder.Entity<CartItem>()
-            .HasOne(cI => cI.Product)
-            .WithMany()
-            .HasForeignKey(cI => cI.ProductId);
+            builder.Entity<Cart>().HasKey(c => c.Id);
+            builder.Entity<Cart>().Property(c => c.UserId).IsRequired();
+            builder.Entity<Cart>().HasMany(c => c.Items).WithOne(ci => ci.Cart).HasForeignKey(ci => ci.CartId).OnDelete(DeleteBehavior.Cascade);
+
+
+            builder.Entity<CartItem>().HasKey(ci => ci.Id);
+            builder.Entity<CartItem>().Property(ci => ci.Quantity).IsRequired().HasDefaultValue(1);
+            builder.Entity<CartItem>().HasOne(ci => ci.Product).WithMany().HasForeignKey(ci => ci.ProductId).OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

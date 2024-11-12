@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ECommerceShopApi.Repositories;
 using Microsoft.IdentityModel.Tokens;
+using ECommerceShopApi.Repositories.Role;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +16,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFramework
 
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
+builder.Services.AddScoped<IRolesRepository, RolesRepository>();
 builder.Services.AddScoped<JwtTokenGenerator>();
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
@@ -41,6 +43,11 @@ builder.Services.AddAuthentication(options => {
 
     };
 
+});
+
+builder.Services.AddAuthorization(options => {
+
+    options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"));
 });
 
 builder.Services.AddControllers();
@@ -85,6 +92,29 @@ builder.Services.AddSwaggerGen(c => {
 
 var app = builder.Build();
 
+async Task SeedRolesAsync(IServiceProvider serviceProvider) {
+
+    var rolesRepository = serviceProvider.GetRequiredService<IRolesRepository>();
+    var roles = new[] {"Admin", "Customer"};
+
+    foreach (var role in roles) {
+
+        var roleExists = await rolesRepository.RoleExistsAsync(role);
+
+        if (!roleExists) {
+
+            await rolesRepository.CreateRoleAsync(role);
+        }
+    }
+}
+
+using (var scope = app.Services.CreateScope()) {
+
+    var services = scope.ServiceProvider;
+
+    await SeedRolesAsync(services);
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -100,5 +130,6 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
 
 app.Run();

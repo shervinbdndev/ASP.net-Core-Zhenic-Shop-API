@@ -51,6 +51,7 @@ namespace ECommerceShopApi.Controllers {
 
 
         
+        [Authorize(Roles = "Admin")]
         [HttpPost("add")]
         public async Task<IActionResult> Create([FromBody] Product product) {
 
@@ -74,6 +75,7 @@ namespace ECommerceShopApi.Controllers {
 
 
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("edit/{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] Product product) {
 
@@ -97,6 +99,7 @@ namespace ECommerceShopApi.Controllers {
 
 
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("delete/{id}")]
         public async Task<IActionResult> Delete(int id) {
             var product = await _productRepository.GetProductByIdAsync(id);

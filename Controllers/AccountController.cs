@@ -3,6 +3,7 @@ using ECommerceShopApi.Models;
 using Microsoft.AspNetCore.Mvc;
 using ECommerceShopApi.Repositories;
 using Microsoft.AspNetCore.Authorization;
+using ECommerceShopApi.Repositories.Role;
 
 namespace ECommerceShopApi.Controllers {
     
@@ -12,11 +13,13 @@ namespace ECommerceShopApi.Controllers {
     public class AccountController : ControllerBase {
 
         private readonly IAccountRepository _accountRepository;
+        private readonly IRolesRepository _rolesRepository;
         private readonly JwtTokenGenerator _jwtTokenGenerator;
 
-        public AccountController(IAccountRepository accountRepository, JwtTokenGenerator jwtTokenGenerator) {
+        public AccountController(IAccountRepository accountRepository, IRolesRepository rolesRepository, JwtTokenGenerator jwtTokenGenerator) {
 
             _accountRepository = accountRepository;
+            _rolesRepository = rolesRepository;
             _jwtTokenGenerator = jwtTokenGenerator;
         }
 
@@ -81,6 +84,17 @@ namespace ECommerceShopApi.Controllers {
                     Message = "خروج از حساب کاربری با موفقیت انجام شد"
                 }
             );
+        }
+
+
+
+        [Authorize(Roles = "Admin, Customer")]
+        [HttpDelete("delete/{username}")]
+        public async Task<IActionResult> DeleteUserAsync(string username) {
+
+            var (success, message) = await _accountRepository.DeleteUserIfAuthorizedAsync(User, username);
+            
+            return success ? Ok(message) : StatusCode(403, message);
         }
     }
 }

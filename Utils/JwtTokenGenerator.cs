@@ -1,6 +1,7 @@
 using System.Text;
 using System.Security.Claims;
 using ECommerceShopApi.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 
@@ -17,14 +18,19 @@ namespace ECommerceShopApi.Utils {
 
 
 
-        public string GenerateToken(ApplicationUser user) {
+        public string GenerateToken(ApplicationUser user, IList<string> roles) {
 
-            var claims = new[] {
+            var claims = new List<Claim> {
                 new Claim(JwtRegisteredClaimNames.Sub, user.UserName ?? throw new ArgumentException("UserName")),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim("FirstName", user.FirstName),
                 new Claim("LastName", user.LastName)
             };
+
+            foreach (var role in roles) {
+
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ?? throw new ArgumentException("Key")));
 

@@ -12,13 +12,17 @@ namespace ECommerceShopApi.Repositories {
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IRolesRepository _rolesRepository;
         private readonly JwtTokenGenerator _jwtTokenGenerator;
+        private readonly UserLastLogin _userLastLogin;
+        private readonly ILogger<AccountRepository> _logger;
 
-        public AccountRepository(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IRolesRepository rolesRepository, JwtTokenGenerator jwtTokenGenerator) {
+        public AccountRepository(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IRolesRepository rolesRepository, JwtTokenGenerator jwtTokenGenerator, UserLastLogin userLastLogin, ILogger<AccountRepository> logger) {
 
             _userManager = userManager;
             _signInManager = signInManager;
             _rolesRepository = rolesRepository;
             _jwtTokenGenerator = jwtTokenGenerator;
+            _userLastLogin = userLastLogin;
+            _logger = logger;
         }
 
 
@@ -37,7 +41,9 @@ namespace ECommerceShopApi.Repositories {
                 UserName = model.UserName,
                 FirstName = model.FirstName,
                 LastName = model.LastName,
-                Email = model.Email
+                Email = model.Email,
+                CreatedAt = DateTime.UtcNow,
+                LastLogin = DateTime.UtcNow
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);
@@ -54,7 +60,14 @@ namespace ECommerceShopApi.Repositories {
 
         public async Task<(bool Success, string Message)> DeleteUserIfAuthorizedAsync(ClaimsPrincipal requestingUserClaims, string username) {
 
-            var requestingUser = await GetUserByUsernameAsync(requestingUserClaims.FindFirstValue(ClaimTypes.Name));
+            var usernameClaim = requestingUserClaims?.FindFirstValue(ClaimTypes.Name);
+
+            if (string.IsNullOrEmpty(usernameClaim)) {
+
+                return (false, "Requesting User is not Authenticated or username is missing");
+            }
+
+            var requestingUser = await GetUserByUsernameAsync(usernameClaim);
 
             if (requestingUser == null) return (false, "Requesting user not found");
 
@@ -75,13 +88,6 @@ namespace ECommerceShopApi.Repositories {
             }
 
             return (true, "حساب کاربری با موفقیت حذف گردید");
-        }
-
-
-
-        public async Task<IdentityResult> DeleteUserAsync(ApplicationUser user) {
-
-            return await _userManager.DeleteAsync(user);
         }
 
 
@@ -107,6 +113,8 @@ namespace ECommerceShopApi.Repositories {
 
             if (user == null) throw new InvalidOperationException("User not found");
 
+            await _userLastLogin.Set(user);
+
             var roles = await _userManager.GetRolesAsync(user);
             var token = _jwtTokenGenerator.GenerateToken(user, roles);
 
@@ -118,6 +126,37 @@ namespace ECommerceShopApi.Repositories {
                 FirstName = user.FirstName,
                 LastName = user.LastName
             };
+        }
+
+
+
+        public async Task<IdentityResult> ResetPasswordAsync(string email, string token, string newPassword) {
+
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user == null) {
+
+                _logger.LogWarning($"تلاش برای بازنشانی رمز عبور برای ایمیل {email} ناموفق بود");
+
+                return IdentityResult.Failed(new IdentityError {
+                    Description = "کاربری یافت نشد"
+                });
+            }
+
+            var result = await _userManager.ResetPasswordAsync(user, token, newPassword);
+
+            if (result.Succeeded) {
+
+                _logger.LogInformation($"رمز عبور جدید برای ایمیل {email} تنظیم شد");
+            } else {
+
+                foreach (var error in result.Errors) {
+
+                    _logger.LogWarning(error.Description);
+                }
+            }
+
+            return result;
         }
 
 

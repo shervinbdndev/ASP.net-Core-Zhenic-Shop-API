@@ -72,6 +72,30 @@ namespace ECommerceShopApi.Controllers {
             return Ok(loginResponse);
         }
 
+
+
+        [AllowAnonymous]
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordModel model) {
+
+            if (!ModelState.IsValid) {
+
+                return BadRequest("دیتای ورودی معتبر نیست");
+            }
+
+            var result = await _accountRepository.ResetPasswordAsync(model.Email, model.token, model.newPassword);
+
+            if (result.Succeeded) {
+
+                return Ok(new {
+                    Message = "رمز عبور شما با موفقیت بازنشانی شد"
+                });
+            }
+
+            return BadRequest("عملیات بازنشانی رمز عبور ناموفق بود");
+        }
+
+
         
 
         [Authorize]

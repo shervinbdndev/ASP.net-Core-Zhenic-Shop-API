@@ -9,6 +9,7 @@ namespace ECommerceShopApi.Repositories {
         Task<ApplicationUser> GetUserByUsernameAsync(string username);
         Task<IdentityResult> RegisterUserAsync(RegisterModel model);
         Task<LoginResponse> LoginUserAsync(LoginModel model);
+        Task<IdentityResult> ResetPasswordAsync(string email, string token, string newPassword);
         Task<(bool Success, string Message)> DeleteUserIfAuthorizedAsync(ClaimsPrincipal requestingUserClaims ,string username);
         Task SignOutUserAsync();
     }

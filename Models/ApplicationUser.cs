@@ -1,5 +1,5 @@
-using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
 
 namespace ECommerceShopApi.Models {
 
@@ -14,5 +14,9 @@ namespace ECommerceShopApi.Models {
         [Required(ErrorMessage = "نام خانوادگی الزامی است")]
         [StringLength(50, MinimumLength = 2, ErrorMessage = "نام خانوادگی باید بین  تا 50 کاراکتر باشد")]
         public required string LastName {get; set;}
+
+
+        public DateTime CreatedAt {get; set;} = DateTime.UtcNow;
+        public DateTime LastLogin {get; set;}
     }
 }

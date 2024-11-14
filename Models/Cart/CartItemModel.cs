@@ -1,7 +1,8 @@
+using ECommerceShopApi.Models.ProductModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ECommerceShopApi.Models {
+namespace ECommerceShopApi.Models.CartNameSpace {
 
     public class CartItem {
 
@@ -26,10 +27,10 @@ namespace ECommerceShopApi.Models {
 
 
         [Required]
-        public required Product Product {get; set;} = null!;
+        public required Product? Product {get; set;}
 
 
         [Required]
-        public required Cart Cart {get; set;} = null!;
+        public required Cart? Cart {get; set;}
     }
 }

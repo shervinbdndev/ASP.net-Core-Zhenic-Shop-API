@@ -1,4 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using ECommerceShopApi.Models.Category;
+using ECommerceShopApi.Models.ProductModel;
+using ECommerceShopApi.Models.CartNameSpace;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace ECommerceShopApi.Models {
@@ -11,9 +14,10 @@ namespace ECommerceShopApi.Models {
             }
 
 
-        public DbSet<Cart> carts {get; set;}
-        public DbSet<CartItem> cartItems {get; set;}
-        public DbSet<Product> Products {get; set;}
+        public DbSet<Cart> carts {get; set;} = null!;
+        public DbSet<CartItem> cartItems {get; set;} = null!;
+        public DbSet<Product> Products {get; set;} = null!;
+        public DbSet<CategoryModel> Categories {get; set;} = null!;
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -28,6 +32,13 @@ namespace ECommerceShopApi.Models {
             builder.Entity<CartItem>().HasKey(ci => ci.Id);
             builder.Entity<CartItem>().Property(ci => ci.Quantity).IsRequired().HasDefaultValue(1);
             builder.Entity<CartItem>().HasOne(ci => ci.Product).WithMany().HasForeignKey(ci => ci.ProductId).OnDelete(DeleteBehavior.Cascade);
+
+            
+            builder.Entity<CategoryModel>().HasKey(c => c.Id);
+            builder.Entity<CategoryModel>().Property(c => c.Name).IsRequired().HasMaxLength(50);
+
+
+            builder.Entity<Product>().HasOne(p => p.Category).WithMany(c => c.Products).HasForeignKey(p => p.CategoryById).OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

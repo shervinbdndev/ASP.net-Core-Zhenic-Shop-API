@@ -1,9 +1,9 @@
 using ECommerceShopApi.Utils;
-using ECommerceShopApi.Models;
 using Microsoft.AspNetCore.Mvc;
-using ECommerceShopApi.Repositories;
+using ECommerceShopApi.Models.Account;
 using Microsoft.AspNetCore.Authorization;
 using ECommerceShopApi.Repositories.Role;
+using ECommerceShopApi.Repositories.Account;
 
 namespace ECommerceShopApi.Controllers {
     

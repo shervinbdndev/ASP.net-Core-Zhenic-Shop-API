@@ -1,7 +1,8 @@
 using System.Text.Json.Serialization;
+using ECommerceShopApi.Models.Category;
 using System.ComponentModel.DataAnnotations;
 
-namespace ECommerceShopApi.Models {
+namespace ECommerceShopApi.Models.ProductModel {
 
     public class Product {
 
@@ -31,6 +32,12 @@ namespace ECommerceShopApi.Models {
 
         [Range(0, int.MaxValue, ErrorMessage = "تعداد موجود باید غیر منفی باشد")]
         public int Stock {get; set;}
+
+
+        public int CategoryById {get; set;}
+
+
+        public required CategoryModel Category {get; set;}
 
 
         [JsonIgnore]

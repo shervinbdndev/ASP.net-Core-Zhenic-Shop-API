@@ -4,10 +4,12 @@ using ECommerceShopApi.Models;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using ECommerceShopApi.Repositories;
 using Microsoft.IdentityModel.Tokens;
 using ECommerceShopApi.Repositories.Role;
+using ECommerceShopApi.Repositories.Account;
+using ECommerceShopApi.Repositories.Category;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using ECommerceShopApi.Repositories.ProductNameSpace;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,7 +19,9 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFramework
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IRolesRepository, RolesRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<JwtTokenGenerator>();
+builder.Services.AddScoped<UserLastLogin>();
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var key = jwtSettings["Key"] ?? throw new ArgumentException("key");
@@ -48,6 +52,7 @@ builder.Services.AddAuthentication(options => {
 builder.Services.AddAuthorization(options => {
 
     options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("CategoryManagement", policy => policy.RequireRole("Admin"));
 });
 
 builder.Services.AddControllers();

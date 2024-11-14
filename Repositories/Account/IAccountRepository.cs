@@ -1,8 +1,9 @@
 using System.Security.Claims;
 using ECommerceShopApi.Models;
 using Microsoft.AspNetCore.Identity;
+using ECommerceShopApi.Models.Account;
 
-namespace ECommerceShopApi.Repositories {
+namespace ECommerceShopApi.Repositories.Account {
 
     public interface IAccountRepository {
 

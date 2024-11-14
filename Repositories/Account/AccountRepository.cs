@@ -2,9 +2,10 @@ using ECommerceShopApi.Utils;
 using System.Security.Claims;
 using ECommerceShopApi.Models;
 using Microsoft.AspNetCore.Identity;
+using ECommerceShopApi.Models.Account;
 using ECommerceShopApi.Repositories.Role;
 
-namespace ECommerceShopApi.Repositories {
+namespace ECommerceShopApi.Repositories.Account {
 
     public class AccountRepository : IAccountRepository {
 
@@ -64,27 +65,27 @@ namespace ECommerceShopApi.Repositories {
 
             if (string.IsNullOrEmpty(usernameClaim)) {
 
-                return (false, "Requesting User is not Authenticated or username is missing");
+                return (false, "کاربر موردنظر احراز حویت نشده یا نام کاربری وجود ندارد");
             }
 
             var requestingUser = await GetUserByUsernameAsync(usernameClaim);
 
-            if (requestingUser == null) return (false, "Requesting user not found");
+            if (requestingUser == null) return (false, "کاربر موردنظر یافت نشد");
 
             var userToDelete = await GetUserByUsernameAsync(username);
 
-            if (userToDelete == null) return (false, "User not found.");
+            if (userToDelete == null) return (false, "کاربری یافت نشد");
 
             if (requestingUser.UserName != username && !await _rolesRepository.IsUserAdminAsync(requestingUser)) {
 
-                return (false, "You do not have permission to delete this user");
+                return (false, "شما اجازه حذف این کاربر را ندارید");
             }
 
             var result = await _userManager.DeleteAsync(userToDelete);
 
             if (!result.Succeeded) {
 
-                return (false, "An error occured while deleting the user");
+                return (false, "حذف کاربر با مشکل مواجه شد");
             }
 
             return (true, "حساب کاربری با موفقیت حذف گردید");

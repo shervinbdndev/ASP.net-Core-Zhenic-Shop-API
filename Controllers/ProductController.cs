@@ -1,7 +1,7 @@
-using ECommerceShopApi.Models;
 using Microsoft.AspNetCore.Mvc;
-using ECommerceShopApi.Repositories;
 using Microsoft.AspNetCore.Authorization;
+using ECommerceShopApi.Models.ProductModel;
+using ECommerceShopApi.Repositories.ProductNameSpace;
 
 
 namespace ECommerceShopApi.Controllers {

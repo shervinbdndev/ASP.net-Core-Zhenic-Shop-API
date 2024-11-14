@@ -1,7 +1,8 @@
 using ECommerceShopApi.Models;
 using Microsoft.EntityFrameworkCore;
+using ECommerceShopApi.Models.ProductModel;
 
-namespace ECommerceShopApi.Repositories {
+namespace ECommerceShopApi.Repositories.ProductNameSpace {
 
     public class ProductRepository : IProductRepository {
 
@@ -19,9 +20,18 @@ namespace ECommerceShopApi.Repositories {
 
 
 
+        public async Task<IEnumerable<Product>> GetProductsByCategoryAsync(int categoryId) {
+
+            return await _context.Products.Where(p => p.CategoryById == categoryId).Include(p => p.Category).ToListAsync();
+        }
+
+
+
         public async Task<Product> GetProductByIdAsync(int id) {
 
-            return await _context.Products.FindAsync(id);
+            var product = await _context.Products.FindAsync(id);
+
+            return product ?? throw new KeyNotFoundException($"کالا با مشخصه {id} یافت نشد");
         }
 
 

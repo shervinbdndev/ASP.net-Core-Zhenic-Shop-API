@@ -14,8 +14,8 @@ namespace ECommerceShopApi.Models {
             }
 
 
-        public DbSet<Cart> carts {get; set;} = null!;
-        public DbSet<CartItem> cartItems {get; set;} = null!;
+        public DbSet<Cart> Carts {get; set;} = null!;
+        public DbSet<CartItem> CartItems {get; set;} = null!;
         public DbSet<Product> Products {get; set;} = null!;
         public DbSet<CategoryModel> Categories {get; set;} = null!;
 

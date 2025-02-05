@@ -27,10 +27,10 @@ namespace ECommerceShopApi.Models.CartNameSpace {
 
 
         [Required]
-        public required Product? Product {get; set;}
+        public Product? Product {get; set;}
 
 
         [Required]
-        public required Cart? Cart {get; set;}
+        public Cart? Cart {get; set;}
     }
 }

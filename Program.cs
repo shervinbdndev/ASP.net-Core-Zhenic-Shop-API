@@ -10,6 +10,7 @@ using ECommerceShopApi.Repositories.Account;
 using ECommerceShopApi.Repositories.Category;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using ECommerceShopApi.Repositories.ProductNameSpace;
+using ECommerceShopApi.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +21,7 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IRolesRepository, RolesRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<ICartRepository, CartRepository>();
 builder.Services.AddScoped<JwtTokenGenerator>();
 builder.Services.AddScoped<UserLastLogin>();
 
